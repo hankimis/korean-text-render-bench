@@ -1,5 +1,7 @@
 # Korean Text Rendering in Image Models — Benchmark
 
+[![DOI](https://zenodo.org/badge/1253261263.svg)](https://zenodo.org/badge/latestdoi/1253261263)
+
 How accurately do text-to-image models draw **Korean (Hangul)** text? Most rendering benchmarks are English-centric and skip the writing systems where models actually struggle. This one measures it directly, reproducibly, with a single command.
 
 The same prompt, drawn by 9 models (cycling through all 14 prompts):
