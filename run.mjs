@@ -9,11 +9,15 @@ if (!FAL || !OAI) { console.error("Set FAL_API_KEY and OPENAI_API_KEY"); process
 
 // Text-capable image models across the price range. sizeMode mirrors each endpoint's API.
 const MODELS = [
-  { id: "ideogram-v3",   endpoint: "fal-ai/ideogram/v3",                              size: "ar" },
-  { id: "recraft-v4",    endpoint: "fal-ai/recraft/v4/text-to-image",                 size: "ar" },
-  { id: "gpt-image-1.5", endpoint: "fal-ai/gpt-image-1.5",                            size: "ar" },
-  { id: "seedream-5",    endpoint: "fal-ai/bytedance/seedream/v5/lite/text-to-image", size: "px" },
-  { id: "flux-2-flash",  endpoint: "fal-ai/flux-2/flash",                             size: "hd" },
+  { id: "ideogram-v3",     endpoint: "fal-ai/ideogram/v3",                                  size: "ar" },
+  { id: "recraft-v4",      endpoint: "fal-ai/recraft/v4/text-to-image",                     size: "ar" },
+  { id: "recraft-v4-pro",  endpoint: "fal-ai/recraft/v4/pro/text-to-image",                 size: "ar" },
+  { id: "gpt-image-1.5",   endpoint: "fal-ai/gpt-image-1.5",                                size: "ar" },
+  { id: "gpt-image-2",     endpoint: "openai/gpt-image-2",                                  size: "ar" },
+  { id: "seedream-5",      endpoint: "fal-ai/bytedance/seedream/v5/lite/text-to-image",     size: "px" },
+  { id: "nano-banana-pro", endpoint: "fal-ai/nano-banana-pro",                              size: "ar" },
+  { id: "imagen-4",        endpoint: "fal-ai/imagen4/preview",                              size: "ar" },
+  { id: "flux-2-flash",    endpoint: "fal-ai/flux-2/flash",                                 size: "hd" },
 ];
 const PROMPTS = JSON.parse(readFileSync(new URL("./prompts.json", import.meta.url)));
 const tmpl = (t) => `A clean minimalist poster. Large bold Korean text that reads exactly "${t}", centered. Plain white background, black sans-serif lettering, high resolution, sharp legible type, no other text.`;
@@ -41,13 +45,14 @@ async function gen(m, prompt) {
     method: "POST", signal,
     headers: { "Content-Type": "application/json", Authorization: `Key ${FAL}` },
     body: JSON.stringify(body),
-  }), 90_000);
+  }), 150_000);
   const j = await r.json();
   if (!r.ok) throw new Error(`fal ${r.status}: ${JSON.stringify(j).slice(0, 160)}`);
   const url = j.images?.[0]?.url || j.image?.url || j.output?.url;
   if (!url) throw new Error("no image url");
   return url;
 }
+
 async function ocr(url) {
   const r = await withTimeout((signal) => fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST", signal,
@@ -56,7 +61,7 @@ async function ocr(url) {
       { type: "text", text: "Transcribe EXACTLY the main large text in this image, verbatim, Korean included. If unreadable or none, reply empty string. Reply ONLY JSON: {\"text\":\"...\"}" },
       { type: "image_url", image_url: { url, detail: "low" } },
     ] }] }),
-  }), 60_000);
+  }), 90_000);
   const j = await r.json();
   if (!r.ok) throw new Error(`openai ${r.status}`);
   const t = j.choices?.[0]?.message?.content || "";
@@ -72,24 +77,36 @@ async function pool(tasks, n) {
   return out;
 }
 
-const tasks = [];
-for (const m of MODELS) for (const p of PROMPTS) tasks.push(async () => {
-  const prompt = tmpl(p.text);
-  try {
-    const url = await gen(m, prompt);
-    const read = await ocr(url);
-    const score = cer(read, p.text);
-    const row = { model: m.id, prompt: p.id, target: p.text, read, cer: score, exact: score === 0, url };
-    process.stdout.write(`  ${m.id.padEnd(13)} ${p.id.padEnd(11)} target=[${p.text}] read=[${read}] CER=${score.toFixed(2)}${score === 0 ? " EXACT" : ""}\n`);
-    return row;
-  } catch (e) {
-    process.stdout.write(`  ${m.id.padEnd(13)} ${p.id.padEnd(11)} FAILED: ${String(e.message).slice(0, 80)}\n`);
-    return { model: m.id, prompt: p.id, target: p.text, read: null, cer: null, exact: false, url: null, error: String(e.message) };
-  }
-});
+// Resume: reuse successful cells from a prior results.json, only (re)run the rest.
+const prior = {};
+try {
+  const old = JSON.parse(readFileSync(new URL("./results.json", import.meta.url)));
+  for (const r of old.rows || []) if (r.cer != null) prior[`${r.model}|${r.prompt}`] = r;
+} catch { /* first run */ }
 
-console.log(`Korean text-rendering benchmark: ${MODELS.length} models x ${PROMPTS.length} prompts = ${tasks.length} generations\n`);
-const rows = await pool(tasks, 5);
+const rows = [];
+const tasks = [];
+for (const m of MODELS) for (const p of PROMPTS) {
+  const cached = prior[`${m.id}|${p.id}`];
+  if (cached) { rows.push(cached); continue; }
+  tasks.push(async () => {
+    const prompt = tmpl(p.text);
+    try {
+      const url = await gen(m, prompt);
+      const read = await ocr(url);
+      const score = cer(read, p.text);
+      const row = { model: m.id, prompt: p.id, target: p.text, read, cer: score, exact: score === 0, url };
+      process.stdout.write(`  ${m.id.padEnd(15)} ${p.id.padEnd(11)} target=[${p.text}] read=[${(read||"").replace(/\n/g," ")}] CER=${score.toFixed(2)}${score === 0 ? " EXACT" : ""}\n`);
+      return row;
+    } catch (e) {
+      process.stdout.write(`  ${m.id.padEnd(15)} ${p.id.padEnd(11)} FAILED: ${String(e.message).slice(0, 80)}\n`);
+      return { model: m.id, prompt: p.id, target: p.text, read: null, cer: null, exact: false, url: null, error: String(e.message) };
+    }
+  });
+}
+
+console.log(`Korean text-rendering benchmark: ${MODELS.length} models x ${PROMPTS.length} prompts. reused ${rows.length}, running ${tasks.length}.\n`);
+rows.push(...await pool(tasks, 4));
 
 // Aggregate per model
 const agg = MODELS.map((m) => {

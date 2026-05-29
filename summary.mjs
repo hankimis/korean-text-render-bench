@@ -3,9 +3,10 @@ import { readFileSync } from "node:fs";
 const { rows, agg } = JSON.parse(readFileSync(new URL("./results.json", import.meta.url)));
 const G = "\x1b[32m", R = "\x1b[31m", Y = "\x1b[33m", B = "\x1b[1m", D = "\x1b[2m", X = "\x1b[0m", C = "\x1b[36m";
 
-console.log(`\n${B}Korean Text Rendering in Image Models${X} ${D}— ${agg.length} models x 8 Hangul prompts${X}\n`);
+const nPrompts = new Set(rows.map(r => r.prompt)).size;
+console.log(`\n${B}Korean Text Rendering in Image Models${X} ${D}— ${agg.length} models x ${nPrompts} Hangul prompts${X}\n`);
 console.log(`${D}where models slipped (target -> what was actually drawn):${X}`);
-const misses = rows.filter(r => r.cer != null && r.cer > 0).sort((a, b) => b.cer - a.cer);
+const misses = rows.filter(r => r.cer != null && r.cer > 0).sort((a, b) => b.cer - a.cer).slice(0, 7);
 const exacts = rows.filter(r => r.cer === 0 && ["doublecons", "brand"].includes(r.prompt)).slice(0, 2);
 for (const r of [...misses, ...exacts]) {
   const col = r.cer === 0 ? G : r.cer < 0.3 ? Y : R;
