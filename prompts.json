@@ -1,0 +1,10 @@
+[
+  { "id": "greeting",   "text": "안녕하세요",          "note": "basic greeting" },
+  { "id": "spacing",    "text": "커피 한 잔",           "note": "word spacing" },
+  { "id": "batchim",    "text": "책갈피",              "note": "final consonants" },
+  { "id": "date",       "text": "9월 14일 토요일",      "note": "digits + Korean" },
+  { "id": "phrase",     "text": "행복을 드립니다",       "note": "full phrase, batchim" },
+  { "id": "doublecons", "text": "닭갈비 맛집",          "note": "complex jamo (ㄺ)" },
+  { "id": "brand",      "text": "주식회사 아이오브",      "note": "longer brand string" },
+  { "id": "short",      "text": "사랑해",              "note": "short, simple" }
+]

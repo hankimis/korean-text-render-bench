@@ -1,0 +1,406 @@
+{
+  "rows": [
+    {
+      "model": "ideogram-v3",
+      "prompt": "greeting",
+      "target": "안녕하세요",
+      "read": "안녕하세요",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f7/XWxkHA47-4av51JJjK5rE_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "spacing",
+      "target": "커피 한 잔",
+      "read": "커피 한잔",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f7/fUJ5IUQKEvK5DylPkj3hz_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "batchim",
+      "target": "책갈피",
+      "read": "책갈피",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f7/6s0xcwy3cF0-HIAjr-JPD_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "date",
+      "target": "9월 14일 토요일",
+      "read": "9월14일\n토요일",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f7/u40XzaVmlfqWXY_Ng4RJA_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "phrase",
+      "target": "행복을 드립니다",
+      "read": "행복을 드립니다",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f7/1FSiFxeK-bc2byIsiQNjI_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "doublecons",
+      "target": "닭갈비 맛집",
+      "read": "덩갈비멋집",
+      "cer": 0.4,
+      "exact": false,
+      "url": "https://v3b.fal.media/files/b/0a9c22f8/Ujf_T0Fwva-K4A2T0daod_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "brand",
+      "target": "주식회사 아이오브",
+      "read": "주식회사 아이오브",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f8/kTY0vbgw7SIk13U1_z8N2_image.png"
+    },
+    {
+      "model": "ideogram-v3",
+      "prompt": "short",
+      "target": "사랑해",
+      "read": "사랑해",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f8/_Qi3gXhU2U8SvZ2JBjSG1_image.png"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "greeting",
+      "target": "안녕하세요",
+      "read": "안녕하세요",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f8/9i0kCyiphHyl_2IJriS9d_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "spacing",
+      "target": "커피 한 잔",
+      "read": "커피 한 잔",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f8/nqFRLNAm4LtXJfYmsf9jc_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "batchim",
+      "target": "책갈피",
+      "read": "책갈피",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f9/F_hX5BUXGnvqWqsBBzdQW_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "date",
+      "target": "9월 14일 토요일",
+      "read": "9월 14일 토요일",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f9/a8NFokjwv4Nw73TaKREcu_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "phrase",
+      "target": "행복을 드립니다",
+      "read": "행복을 드립니다",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f9/OUCjad8FJ5AcTANOqvsw9_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "doublecons",
+      "target": "닭갈비 맛집",
+      "read": "닭갈비 맛집",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f9/OR66W-tO7JcK4_o1Y79hz_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "brand",
+      "target": "주식회사 아이오브",
+      "read": "주식회사 아이오브",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22f9/bDIT_069ghb4X0kui0HHC_image.webp"
+    },
+    {
+      "model": "recraft-v4",
+      "prompt": "short",
+      "target": "사랑해",
+      "read": "사랑해",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fa/ViSPTEY-WERXkD5CDnTAd_image.webp"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "greeting",
+      "target": "안녕하세요",
+      "read": "안녕하세요",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fa/vppn0sn-sUA03f7F3mtk-_IqbMYbMQ.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "spacing",
+      "target": "커피 한 잔",
+      "read": "커피 한\n한잔",
+      "cer": 0.25,
+      "exact": false,
+      "url": "https://v3b.fal.media/files/b/0a9c22fa/zaBCq7zEj1qW0ZWMDvvyD_zX9Tn1iO.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "batchim",
+      "target": "책갈피",
+      "read": "책갈피",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fa/AzlUF0DHgA2cUQhAKLHHF_fACnyQae.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "date",
+      "target": "9월 14일 토요일",
+      "read": "9월 14일 토요일",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fa/LZ4CzJHlP4XUsyVRyDgQF_lgD95Pqg.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "phrase",
+      "target": "행복을 드립니다",
+      "read": "행복을 드립니다",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fb/QLBHB567-NBiaQoW6dU4Y_I7oQsILw.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "doublecons",
+      "target": "닭갈비 맛집",
+      "read": "닭갈비 맛집",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fd/AcWuWb6ynWj5DTdFlsZsN_frItd1DN.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "brand",
+      "target": "주식회사 아이오브",
+      "read": "주식회사 아이오브",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fd/ikDbNTTnC0-ViO0jWFCO8_28i2Ktww.png"
+    },
+    {
+      "model": "gpt-image-1.5",
+      "prompt": "short",
+      "target": "사랑해",
+      "read": "사랑해",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22fd/fUc-1DNDNYEJDSkxUW-Ta_ufaxDu0Y.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "greeting",
+      "target": "안녕하세요",
+      "read": "안녕하세요",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2300/AfDtFNM8zxJ-oEjaYUJ_R_31a87d5ebc1c47daa754844d6c110e3e.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "spacing",
+      "target": "커피 한 잔",
+      "read": "커피 한 잔",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c22ff/eNNrmkNC8ymkmXwFpoKAQ_3c1a4729916b4fdda19822420334aa8e.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "batchim",
+      "target": "책갈피",
+      "read": "책갈피",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/QKSvrFFaVUgI1nUbu4fey_fa3984c960d84ec9a2864f99782143a9.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "date",
+      "target": "9월 14일 토요일",
+      "read": "9월 14일 토요일",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/06qx2EfrZoqIDhSdF0PGo_946ebd061cdd4653a631b5abde07cbfd.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "phrase",
+      "target": "행복을 드립니다",
+      "read": "행복을 드립니다",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/mlFo4a-rNaaWykqkm3jR7_25da6cf49a434fd3b53b720c34d2a315.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "doublecons",
+      "target": "닭갈비 맛집",
+      "read": "닭갈비 맛집",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/lzOZMUOj4xx0SpU_m6tc6_e203b7ec6dbd402cb43045e4069df20b.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "brand",
+      "target": "주식회사 아이오브",
+      "read": "주식회사 아이오브",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/kWhs-Ok6_Yfsur7GyU2R6_f0972d0e803a4153b09bdfbdd44af53f.png"
+    },
+    {
+      "model": "seedream-5",
+      "prompt": "short",
+      "target": "사랑해",
+      "read": "사랑해",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2303/SQeOs8ew7K-LAYNI1oUVJ_25cca5764b6f49f0bb4c6610dbca0228.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "greeting",
+      "target": "안녕하세요",
+      "read": "안녕하세요",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/ezWBoxyCJo2SZlyGl65zR_8cbu6Mea.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "spacing",
+      "target": "커피 한 잔",
+      "read": "커피 한 잔",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2301/GaQZkNmL1a-2TilsKk_Df_QwALVIuc.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "batchim",
+      "target": "책갈피",
+      "read": "책갈피",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/7UuZbzPrL1lE0er7o3mwA_Q0RhiXBf.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "date",
+      "target": "9월 14일 토요일",
+      "read": "9월 14일 토세언",
+      "cer": 0.25,
+      "exact": false,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/OqDSqebDlPuMEMPD6MtPV_9xQiqAma.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "phrase",
+      "target": "행복을 드립니다",
+      "read": "행복을 드립니다",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/M2SFCyp4_T9e_Cj5qHcAl_vH4oaxuJ.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "doublecons",
+      "target": "닭갈비 맛집",
+      "read": "닭갈비 맛집",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/um5t_gPCDVMb8b8EVOYvJ_bGBdax7i.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "brand",
+      "target": "주식회사 아이오브",
+      "read": "주성휘브",
+      "cer": 0.75,
+      "exact": false,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/qqjmsllKQaCYVlEgfnt58_WpClveud.png"
+    },
+    {
+      "model": "flux-2-flash",
+      "prompt": "short",
+      "target": "사랑해",
+      "read": "사랑해",
+      "cer": 0,
+      "exact": true,
+      "url": "https://v3b.fal.media/files/b/0a9c2302/X0EhT6kuVFHoGCBogKiHE_lZ9KP7ZM.png"
+    }
+  ],
+  "agg": [
+    {
+      "model": "recraft-v4",
+      "n": 8,
+      "fails": 0,
+      "meanCer": 0,
+      "exactRate": 1,
+      "exact": 8
+    },
+    {
+      "model": "seedream-5",
+      "n": 8,
+      "fails": 0,
+      "meanCer": 0,
+      "exactRate": 1,
+      "exact": 8
+    },
+    {
+      "model": "gpt-image-1.5",
+      "n": 8,
+      "fails": 0,
+      "meanCer": 0.03125,
+      "exactRate": 0.875,
+      "exact": 7
+    },
+    {
+      "model": "ideogram-v3",
+      "n": 8,
+      "fails": 0,
+      "meanCer": 0.05,
+      "exactRate": 0.875,
+      "exact": 7
+    },
+    {
+      "model": "flux-2-flash",
+      "n": 8,
+      "fails": 0,
+      "meanCer": 0.125,
+      "exactRate": 0.75,
+      "exact": 6
+    }
+  ]
+}

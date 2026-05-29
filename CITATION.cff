@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "Korean Text Rendering in Image Models — Benchmark"
+message: "If you use this benchmark, please cite it."
+type: dataset
+authors:
+  - family-names: Kim
+    given-names: Han
+    affiliation: IOV LABS
+repository-code: "https://github.com/hankimis/korean-text-render-bench"
+date-released: "2026-05-29"
+license: MIT
+keywords:
+  - text-to-image
+  - OCR
+  - Korean
+  - Hangul
+  - evaluation
+  - character error rate
