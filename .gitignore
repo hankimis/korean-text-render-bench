@@ -3,3 +3,6 @@ frames-*.png
 lastframe.png
 check.png
 smoke.mjs
+raw/
+frames/
+build.mjs

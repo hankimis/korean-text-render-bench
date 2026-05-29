@@ -2,7 +2,9 @@
 
 How accurately do text-to-image models draw **Korean (Hangul)** text? Most rendering benchmarks are English-centric and skip the writing systems where models actually struggle. This one measures it directly, reproducibly, with a single command.
 
-![demo](docs/demo.gif)
+The same prompt, drawn by 9 models (cycling through all 14 prompts):
+
+![model renders, cycled per prompt](docs/samples/renders.gif)
 
 ## Leaderboard
 
@@ -30,6 +32,14 @@ Three models (recraft-v4-pro, seedream-5, nano-banana-pro) rendered every prompt
 - **Complex jamo and tense consonants.** `떡볶이` → `덕볶이` (flux), `맑음` (cluster ㄻ) → `맘음` (flux); ideogram-v3 missed most of the harder set (5/14).
 - **Longer / less common strings.** `주식회사 아이오브` came out of flux-2-flash as `주성휘브`; digits drift too (`커피 2잔` → `커피 22잔`).
 
+The hardest prompt, `닭갈비 맛집`, across all nine models (label = model + CER):
+
+![닭갈비 맛집 across nine models](docs/samples/compare-doublecons.png)
+
+imagen-4 in particular never produces real Hangul — the label is the intended text, the image is what it actually drew:
+
+![imagen-4 renders Korean as gibberish](docs/samples/imagen4-fails.png)
+
 ## Reproduce
 
 No dependencies beyond Node 18+ (uses global `fetch`).
@@ -42,6 +52,10 @@ node summary.mjs            # pretty-prints the saved results (used for the GIF)
 ```
 
 Edit [`prompts.json`](./prompts.json) to add targets, or the `MODELS` list in [`run.mjs`](./run.mjs) to test more models. A full run is ~126 generations (a few dollars of API); `run.mjs` resumes from `results.json`, so re-running only retries failed cells.
+
+`node summary.mjs` prints the saved leaderboard:
+
+![summary.mjs leaderboard](docs/demo.gif)
 
 ## Method
 
