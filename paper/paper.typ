@@ -41,7 +41,7 @@
   #v(8pt)
   #text(11.5pt)[Han Kim]
   #v(2pt)
-  #text(9pt, fill: luma(90))[IOV Labs (아이오브연구소) · #link("mailto:hankim.masion@gmail.com")[hankim.masion\@gmail.com] · ORCID 0009-0000-5998-1358]
+  #text(9pt, fill: luma(90))[IOV Labs (아이오브연구소) · #link("mailto:hankim@iovstudio.kr")[hankim\@iovstudio.kr] · ORCID 0009-0000-5998-1358]
   #v(3pt)
   #text(9pt, fill: luma(90))[Open benchmark · snapshot 2026-05-29 · compiled #datetime.today().display("[year]-[month]-[day]")]
   #v(5pt)
@@ -93,14 +93,18 @@ Hangul is featural and compositional: each syllable block is assembled from an i
 
 == Contributions and roadmap
 
-Our contributions are listed above. Section 2 reviews text-to-image generation, visual text rendering, and evaluation. Section 3 specifies the benchmark — prompts, models, generation protocol, OCR transcription, and the CER metric. Section 4 reports the leaderboard. Section 5 gives the Hangul-specific error taxonomy with examples. Section 6 discusses the non-transfer finding and the limits of OCR-as-judge. Section 7 states threats to validity, Section 8 covers reproducibility, and Section 9 concludes. Appendices give the prompt set and the metric definition.
+Our contributions are listed above. Section 2 reviews the technical background — diffusion models, text encoders, tokenization, visual text rendering, and evaluation. Section 3 describes the Korean writing system and why its structure and encoding stress a tokenized model. Section 4 specifies the benchmark. Sections 5 and 6 present the leaderboard and a Hangul-specific error taxonomy. Section 7 weighs three mechanistic hypotheses for the failures, and Section 8 examines the validity of the OCR judge. Sections 9 and 10 discuss the practical implications and the epistemics of measurement. Sections 11 and 12 cover limitations and reproducibility, Section 13 sketches future work, and Section 14 concludes. Appendices give the full prompt set, the per-prompt CER matrix, the metric definition, a worked scoring example, and a glossary of Hangul and encoding terms.
 
 // ================= 2 BACKGROUND =================
 = Background and related work
 
 == Text-to-image generation
 
-Contemporary text-to-image systems are largely diffusion models conditioned on a text encoder @rombach2022 @saharia2022 @ramesh2022. Early systems were notoriously poor at rendering legible text inside images, a limitation often attributed to the text encoder's tokenization and to the scarcity of glyph-level supervision. The models evaluated here are recent commercial and open systems served through a common API; we treat them as black boxes and measure only their output.
+Contemporary text-to-image systems are largely denoising diffusion models @ho2020 @rombach2022 conditioned on a learned text representation @saharia2022 @ramesh2022. A diffusion model learns to invert a gradual noising process, generating an image by iteratively denoising from Gaussian noise; the prompt enters as a conditioning signal, typically through cross-attention to the embeddings produced by a frozen text encoder. The image decoder never sees the prompt as characters — it sees a sequence of continuous vectors. This indirection is central to the present study: whether a model can draw a given string depends not only on the pixel decoder but on whether the *text encoder's representation preserves the identity of the requested characters* in the first place. Early systems were notoriously poor at legible in-image text, a limitation widely attributed to the encoder's tokenization and to the scarcity of glyph-level supervision @liu2023. The models evaluated here are recent commercial and open systems served through a common API; we treat them as black boxes and measure only their output, but the mechanisms in Section 7 turn on this encoder–decoder structure.
+
+== Text encoders and tokenization
+
+The two text encoders dominant in image generation are CLIP @radford2021, a contrastively trained vision-language encoder, and T5 @raffel2020, a large text-to-text transformer used by Imagen-family models @saharia2022. Both consume *sub-word tokens* produced by a learned tokenizer — byte-pair encoding @sennrich2016 or the unigram/SentencePiece scheme @kudo2018 — rather than raw characters. Tokenization is the hinge on which script-specific rendering turns. A tokenizer trained on a predominantly English-and-code corpus allocates most of its vocabulary to frequent Latin sub-words; lower-resource scripts @joshi2020 are represented by rarer, coarser, or byte-level tokens, so a Korean syllable that a human reads as one composed block may reach the model as an opaque or fragmented unit. Liu et al. @liu2023 make the causal link explicit: replacing the sub-word encoder with a *character-aware* one substantially improves visual text rendering, which directly implicates tokenization as a cause of failure. Korean is an especially sharp test of this hinge, for reasons that are best stated by describing the writing system itself (Section 3).
 
 == Visual text rendering
 
@@ -110,7 +114,24 @@ A focused line of work has improved in-image text specifically. Liu et al. @liu2
 
 Rendering quality is naturally scored by reading the produced text and comparing it to the target. The comparison is an edit-distance problem: the Levenshtein distance @levenshtein1966 counts the minimum single-character insertions, deletions, and substitutions to transform one string into another, and normalizing it by target length yields the *character error rate* (CER), a standard measure in OCR and speech recognition. The reading step itself uses a model — here a vision-language model transcribes the image — which connects to the broader "model-as-judge" paradigm @zheng2023judge and inherits its central caveat: the judge can be wrong, so the metric is a calibrated proxy, not ground truth (Section 6.2). Reference-free image-text metrics such as CLIPScore @hessel2021clipscore measure semantic alignment, not character-exact rendering, and are therefore unsuitable for this task; exact transcription plus CER is the appropriate instrument.
 
-// ================= 3 BENCHMARK =================
+// ================= 3 HANGUL =================
+= The Korean writing system, technically
+
+Korean is written in Hangul, an alphabet whose letters are grouped into syllabic blocks. Understanding why this is hard for a tokenized generative model requires three layers: the script's compositional structure, its Unicode encoding, and how that encoding meets a sub-word tokenizer.
+
+== Compositional structure
+
+Each Hangul syllable block is composed of two or three *jamo* (letters): an initial consonant (초성, one of 19), a medial vowel (중성, one of 21), and an optional final consonant or consonant cluster (종성, one of 27 plus the empty final). The combinatorics give $19 times 21 times 28 = 11{,}172$ possible modern syllable blocks. Crucially, the jamo are not written left to right like Latin letters; they are *arranged within a square cell* — initial at top-left, vowel to the right or below depending on its orientation, final consonant along the bottom. A renderer must therefore solve a small two-dimensional layout problem *inside every character*, and then sequence the cells. Two structural features make this unforgiving: *tense (doubled) consonants* (ㄲ, ㄸ, ㅃ, ㅆ, ㅉ), which differ from their plain counterparts only by a repeated stroke, and *complex final clusters* (ㄳ, ㄵ, ㄶ, ㄺ, ㄻ, ㄼ, …), which stack two consonants into the already-crowded bottom slot. These are exactly the cells that the weaker models drop or merge (Section 6).
+
+== Unicode encoding and normalization
+
+Unicode encodes Hangul two ways @unicode. The *precomposed* form places each of the 11,172 syllables at its own code point in the Hangul Syllables block (U+AC00–U+D7A3), so 맑 is the single code point U+B9D1. The *decomposed* form spells the same syllable as a sequence of conjoining jamo from the Hangul Jamo block (U+1100–U+11FF): 맑 becomes ㅁ + ㅏ + ㄹㄱ. The two are related by Unicode normalization — NFC composes jamo into precomposed syllables, NFD decomposes them — and are visually identical when rendered but are *different byte sequences*. A model's behaviour can depend on which form its training text and tokenizer use: a precomposed corpus presents each syllable as one (often rare) code point, while a decomposed corpus exposes the jamo structure but lengthens every string. Neither is uniformly better, and the mismatch is a documented source of subtle text-processing bugs.
+
+== Where it meets the tokenizer
+
+Put the two together. Under precomposed encoding, a syllable such as 맑 is one code point that a sub-word tokenizer trained mostly on English will likely see as a single rare token or a multi-byte fallback — an atom with little learned internal structure, so the model has no compositional handle on the ㄻ cluster it contains. Under decomposed encoding the structure is visible but the sequence is long and unusual. Either way, unless the encoder is character- or jamo-aware @liu2023, the path from "the user asked for 맑음" to "place these specific jamo in these specific cells" is lossy. This is the technical reason to expect that a model can learn the *statistics of Hangul's appearance* — what well-formed syllable blocks look like — while failing to render *specific requested* strings, which is precisely the imagen-4 signature documented in Section 4. We stress that this is a hypothesis about a mechanism; the models are black boxes, and Section 7 treats the evidence for and against it.
+
+// ================= 4 BENCHMARK =================
 = Benchmark design
 
 == Task
@@ -130,6 +151,8 @@ Nine text-capable models served through the fal.ai API were evaluated in the 202
 Let $g$ be the string the model actually rendered and $t$ the target. A vision-language model (GPT-4o) transcribes the largest visible text in the image to obtain $g$. The character error rate is the length-normalized Levenshtein distance with whitespace removed:
 $ "CER"(g, t) = (op("lev")(g', t')) / (|t'|), $ <eq-cer>
 where $x'$ denotes $x$ with whitespace stripped and $op("lev")$ is the Levenshtein edit distance @levenshtein1966. $"CER" = 0$ is a perfect render; values near or above $1$ indicate text bearing little or no relation to the target. For each model we report the mean CER over the fourteen prompts and the *exact-match rate*, the fraction of prompts rendered with $"CER" = 0$.
+
+CER is the character-level analogue of the word error rate standard in speech recognition, and inherits its properties. It is a *quasi-metric* on strings: non-negative, zero iff the strings are identical, and symmetric, but unbounded above — and there lies its most informative feature for this task. Because the numerator is an edit *count* and the denominator is the target length, $"CER" > 1$ whenever the rendered string requires more single-character edits than the target has characters, which happens when the output is both wrong and not shorter than the target. A model that *omits* text caps its CER near 1 (delete everything); a model that *confabulates* wrong text of similar or greater length can exceed 1. The distinction matters here: imagen-4's mean of 1.33 is not a scaling artefact but a substantive signal that it emits confident wrong characters rather than blanks (Section 7). We strip whitespace before scoring because poster line-breaking is a layout decision orthogonal to whether the correct glyphs were drawn; we do *not* apply Unicode normalization, so a precomposed and a decomposed rendering of the same syllable would score identically only after the OCR step returns one canonical form, a caveat we revisit in Section 8.
 
 #figure(image("figs/renders.png", width: 92%), caption: [The same prompts drawn by the nine models (one frame of the cycling comparison); each label shows the model and its CER on that prompt.]) <fig-renders>
 
@@ -192,22 +215,71 @@ The hardest single prompt, 닭갈비 맛집 — combining a complex final cluste
 
 #figure(image("figs/compare-doublecons.png", width: 92%), caption: [The hardest prompt, 닭갈비 맛집, rendered by all nine models (label = model + CER). The complex cluster ㄺ and the tense consonant separate the field.]) <fig-compare>
 
-// ================= 6 DISCUSSION =================
+// ================= MECHANISMS =================
+= Mechanisms: why Hangul rendering fails
+
+The black-box nature of the models forbids a definitive causal account, but the *shape* of the errors constrains the space of explanations. We state three hypotheses and weigh each against the observed pattern.
+
+== Hypothesis 1: tokenization starvation
+
+If a model's text encoder tokenizes Korean into rare or byte-level units (Section 3.3), the conditioning signal carries the *presence* of "some Korean" more reliably than the *identity* of each requested syllable. The prediction is a gradient that tracks string frequency and length: common short strings, whose token sequences the model has seen often, render well; rare clusters, brand names, and long strings degrade. This matches the data closely — the failures concentrate on 값을 매기다 (ㅄ), 맑음 (ㄻ), 주식회사 아이오브 (long, uncommon), while greetings and common phrases are universally perfect — and it is consistent with the causal evidence that character-aware encoders fix exactly this @liu2023. Tokenization starvation is the best-supported hypothesis.
+
+== Hypothesis 2: glyph manifold without conditioning
+
+imagen-4 is the critical case. It does not blur or omit; it draws *well-formed but unrequested* syllable blocks — 커피 한 잔 becomes 소동석 고려아는 아라해안, glyphs that are individually valid Hangul. This is the signature of a decoder that has learned the *manifold of Hangul-shaped images* — what the script looks like in aggregate — decoupled from any faithful mapping from the conditioning vector to specific characters. The model has fluency in glyph-space and no faithfulness to the prompt: it knows how to make Korean-looking marks but not which marks the user asked for. A CER above one is the quantitative fingerprint of this regime (Section 4.4). Whether the break lies in the encoder (the character identity never survives tokenization) or in the cross-attention (the identity is present but not used) cannot be resolved from outputs alone, but the *form-without-identity* character of the failure is unambiguous in the images.
+
+== Hypothesis 3: memorization versus composition
+
+The two hypotheses above share a deeper axis: does a model *compose* a requested syllable from its jamo, or *retrieve* a remembered word-image? A composer should generalize to rare-but-regular strings; a retriever should excel on frequent strings and fail on novel ones. The observed gradient — perfect on common, degrading precisely on the rare and the long — is the signature of retrieval-dominant behaviour with weak composition, the visual-text analogue of the compositional-generalization gap documented for sequence models @lake2018. The three perfect models demonstrate that compositional Hangul rendering is *achievable*; the gradient and the imagen-4 failure show that several deployed systems have not achieved it, and instead lean on memorized appearance.
+
+// ================= OCR VALIDITY =================
+= The OCR judge: validity and bounds
+
+Our metric reads each image with a vision-language model, so the judge is itself a fallible model @zheng2023judge, and a benchmark is only as trustworthy as its instrument. We treat the judge's validity explicitly rather than asserting it.
+
+*Failure modes of the judge.* A judge error is a false negative (it misreads a correct render, inflating CER) or a false positive (it "reads" the intended text from an incorrect image, deflating CER). The task is deliberately constructed to suppress false positives: targets are short, the surface is a clean high-contrast poster, and the prompt asks for one string, so a perfect transcription is unlikely to be awarded to a wrong image. False negatives are more plausible and would, if present, *understate* the top models — yet three models still score exactly zero across fourteen prompts, bounding the judge's false-negative rate on clean renders at near zero in this sample.
+
+*The headline is robust to judge noise.* The result that anchors the paper — imagen-4 at mean CER 1.33, 0/14 — sits far outside any plausible OCR error band. No transcription mistake turns a faithful 커피 한 잔 into 소동석 고려아는 아라해안; the judge is reading, accurately, glyphs the model truly drew. The conclusion that imagen-4 cannot render Hangul therefore does not depend on the judge being perfect, only on its being approximately able to read clear Korean, which contemporary vision-language models demonstrably are.
+
+*Where judge noise does matter.* The fine ordering in the middle of the table — gpt-image-2 at 0.038 versus recraft-v4 at 0.071 — is within the range where a single misread shifts a rank. Those distinctions should be read as approximate, and a stronger design would ensemble multiple OCR judges or add human adjudication on disagreements; we flag this as the metric's principal soft spot (Sections 11 and 13) rather than papering over it.
+
+// ================= DISCUSSION =================
 = Discussion
 
 == English skill does not transfer to Korean
 
 The single most important takeaway is a non-transfer result. imagen-4 is, by reputation and on English benchmarks, a strong text renderer; on Korean it is the worst model tested, unable to draw a single correct word. Visual text rendering is therefore *script-specific*: competence in one writing system says little about another, especially across a script boundary as large as Latin-to-Hangul. The most plausible mechanism is consistent with the character-aware-encoder finding of Liu et al. @liu2023 — if a model's text conditioning is tokenized in a way that fragments or under-represents Hangul jamo, the model can learn the *appearance* of Korean (well-formed syllable blocks) without learning to compose *specific* targets, exactly the imagen-4 signature. Whatever the cause, the practical consequence is unambiguous: a model's English text score must not be assumed to hold for Korean, and the only reliable knowledge is a measurement in the target script.
 
-== OCR is itself a model
-
-Our metric reads each image with a vision-language model, which makes the judge fallible — a manifestation of the model-as-judge caveat @zheng2023judge. A misread inflates CER for a render that was actually correct, or (less often) the reverse. Two design choices bound the risk. First, the task is adversarial to false positives: the targets are short, the surface is clean, and a perfect render is unambiguous, so CER 0 is rarely awarded in error. Second, the failure that drives the headline — imagen-4 at mean CER 1.33 — is far outside any plausible OCR noise band; no transcription error explains a model that never produces the requested word. The gradient in the middle of the table is where OCR noise matters most, and those fine distinctions should be read as approximate.
-
 == Implications
 
 For practitioners, the result is directly actionable: if an application renders Korean, the model must be chosen on a Korean measurement, and three models are shown to be safe choices today. More broadly, the benchmark is a concrete instance of a cheap automatic checker (OCR + CER) used as a *quality gate* and a *routing signal* — the same pattern the lab has argued for in generative-media verification: a fast, objective check that can both reject bad outputs and route a request to a model known to handle its script.
 
-// ================= 7 LIMITATIONS =================
+// ================= PHILOSOPHY =================
+= Epistemics and the philosophy of measurement
+
+A benchmark is a small epistemological instrument, and this one — by isolating a single, objectively checkable capability across a script boundary — sharpens several questions that are usually left blurry. We take them up directly, because the lab's position is that the value of a measurement lies as much in what it teaches about knowing as in the leaderboard it produces.
+
+== Form without identity
+
+The imagen-4 failure is philosophically peculiar in a way worth naming. The model does not produce noise or blanks; it produces *well-formed Hangul that is not the requested Hangul*. It has captured the *form* of the script — the statistical look of valid syllable blocks — while missing the *identity* of the specific characters asked for. This is a visual echo of the distinction Bender and Koller @bender2020 draw between form and meaning in language models: a system trained to reproduce surface form can be fluent without being faithful. Here the inversion is instructive — usually "form" is syntax and "meaning" is semantics, but in glyph rendering the *form* is the script's appearance and the *identity* is the referential link to the requested string. imagen-4 is a system with the syntax of Hangul and none of its reference, and it is confidently so. One is reminded of Searle's Chinese Room @searle1980: symbol shapes manipulated into plausible arrangements with no grip on what they denote. We invoke the analogy not to settle the old debate about understanding but to label a concrete, measurable phenomenon — *plausible glyph-shaped output decoupled from the requested content* — that a renderer can exhibit and a benchmark can catch.
+
+== Memorization, composition, and what "can write Korean" means
+
+Behind the leaderboard is a question of competence versus performance. To say a model "can write Korean" could mean it has *memorized* the appearance of many Korean strings, or that it can *compose* any well-formed string from the script's parts. These are different capabilities that a coarse benchmark would conflate and that the easy-to-hard gradient pulls apart: a memorizer aces frequent strings and fails novel ones; a composer generalizes @lake2018. The fourteen prompts are chosen so that the rare clusters and uncommon strings act as a probe for composition, and the observed pattern says most of the field is memorization-dominant, with three genuine composers at the top. The philosophical payoff is a more honest predicate: not "model X can write Korean," but "model X renders frequent Korean and fails on rare structure," which is what a user actually needs to know.
+
+== Confident error and the calibration of generation
+
+A model that omits text when unsure would be, in a sense, well-calibrated: its silence signals its ignorance. imagen-4 does the opposite — it emits wrong characters with full visual confidence, the generative-image analogue of a language model's confabulation @ji2023. The CER-above-one regime is the quantitative trace of *miscalibrated generation*: the model's fluency is uncorrelated with its faithfulness, so its output carries no internal signal of its own failure. This is the deeper danger for downstream use. A blank or a blur is visibly broken; well-formed Korean nonsense on a poster looks correct to anyone who cannot read it, and ships. Measurement is the only defense, which is the whole motivation for a cheap automatic check.
+
+== What you do not measure, you do not see
+
+The most consequential choice in this paper is upstream of any model: the decision to measure Korean at all. Text-in-image rendering is overwhelmingly benchmarked in English, and that convention is not neutral — it renders the failure documented here *invisible*. An English-only evaluation would have ranked imagen-4 among the strong renderers and never surfaced that it cannot write a single Korean word. This is a small instance of a general epistemic hazard: a field's metrics quietly define what it can perceive, and scripts that no one measures become scripts whose failures no one fixes @joshi2020. The corrective is not heroic, only deliberate — measure the writing systems your users actually use — and it has an equity dimension, since the unmeasured scripts are disproportionately those of non-English-speaking communities.
+
+== Reproducibility as honesty
+
+Finally, the instrument is built to be doubted. The metric is computed by a fallible judge, the sample is small, and the model endpoints drift; rather than hide these, the design dates every number, ships the raw transcriptions, resumes from saved results so anyone can re-run a cell, and states the judge's soft spots (Section 8). A benchmark one cannot reproduce or interrogate is an assertion, not a measurement. The point is not that this snapshot is the final word — it is explicitly not — but that it is *checkable*, and a checkable claim that may be wrong is worth more than an unfalsifiable one that sounds right.
+
+// ================= LIMITATIONS =================
 = Limitations and threats to validity
 
 We are explicit about what this benchmark does and does not establish.
@@ -236,7 +308,12 @@ node summary.mjs            # pretty-prints the saved leaderboard
 
 A full run is roughly 126 generations (a few dollars of API). The harness *resumes from saved results*: re-running retries only failed cells, so a partial or interrupted run is cheap to complete. The prompt list (`prompts.json`) and the model list (in `run.mjs`) are the two extension points. The repository ships a `CITATION.cff`, is archived on Zenodo with a DOI, and licenses code under MIT and the writeup and results under CC BY 4.0.
 
-// ================= 9 CONCLUSION =================
+// ================= FUTURE WORK =================
+= Future work
+
+Several extensions would deepen the measurement without changing its character. The most direct is *scale*: more prompts spanning a controlled difficulty grid (systematically varying cluster type, string length, and frequency), multiple images per cell with seed sweeps to turn the snapshot into an estimate with confidence intervals, and a larger model roster refreshed on a schedule so the leaderboard tracks a moving field. Second, *judge robustness*: an ensemble of OCR systems with disagreement-triggered human adjudication would tighten the fine ordering in the middle of the table and quantify the judge's own error rate, converting the soft spot of Section 8 into a measured quantity. Third, *mechanism*: pairing each render with the model's tokenization of the prompt — where the API exposes it — would let the tokenization-starvation hypothesis (Section 7.1) be tested directly rather than inferred from the error gradient, and comparing precomposed against decomposed prompt encodings would isolate the normalization effect of Section 3.2. Fourth, *breadth across scripts*: the same harness applied to other non-Latin, compositional, or low-resource writing systems @joshi2020 would test whether the form-without-identity failure is specific to Hangul or a general property of under-tokenized scripts, and would extend the equity argument of Section 10.4 with data. Finally, *positional error analysis*: scoring at the jamo level (초성/중성/종성) rather than the syllable level would reveal whether failures concentrate in the crowded final-consonant slot, as the qualitative taxonomy suggests.
+
+// ================= CONCLUSION =================
 = Conclusion
 
 We measured how well nine current text-to-image models draw Korean, with a narrow, objective, one-command benchmark: render a Hangul phrase on a plain poster, transcribe it, score it by character error rate. Three models are perfect, a clear gradient of partial competence follows, and one model widely held to be a strong English renderer — imagen-4 — cannot write Hangul at all, producing well-formed nonsense on every prompt. The lesson is general and easy to state: *visual text-rendering skill does not transfer across scripts, and you only learn whether a model can write Korean by measuring it in Korean.* The harness is open, dated, and reproducible, so the measurement can be repeated, extended to other scripts, and kept current as the models move.
@@ -323,3 +400,30 @@ Full CER matrix (2026-05-29 snapshot). Columns are the nine models in leaderboar
 For target $t$ and rendered (transcribed) string $g$, let $t', g'$ be the strings with all whitespace removed. The Levenshtein distance $op("lev")(g', t')$ is the minimum number of single-character insertions, deletions, and substitutions transforming $g'$ into $t'$ @levenshtein1966. The character error rate is
 $ "CER" = (op("lev")(g', t')) / (|t'|), $
 which is $0$ for a perfect render and can exceed $1$ when the rendered string is both wrong and not shorter than the target (the imagen-4 regime, mean $1.33$). The *exact-match rate* for a model is the fraction of its prompts with $"CER" = 0$. Mean CER averages @eq-cer over the fourteen prompts. Whitespace is ignored because poster line-breaking is a layout choice orthogonal to whether the correct characters were drawn.
+
+= Worked scoring example
+
+#set text(9.5pt)
+Take the target $t = $ 맑음 (two syllables) and a rendering transcribed as $g = $ 맘음. After whitespace removal both have length 2, so $|t'| = 2$. Transforming 맘음 into 맑음 requires substituting the first syllable 맘 → 맑 (one edit; the final cluster ㄻ is restored), and the second syllable 음 already matches. Thus $op("lev")(g', t') = 1$ and
+$ "CER" = 1 \/ 2 = 0.500, $
+the value recorded for flux-2-flash on the `clear` prompt (Appendix B). For contrast, imagen-4 on the `spacing` prompt rendered 커피 한 잔 (length 4 after stripping spaces) as a string sharing essentially no characters with the target, requiring on the order of eleven edits against the four-character target, for $"CER" = 2.75$ — a value far above 1 that records confident, wholly wrong output rather than a near miss. The two examples bracket the metric's range: a single restorable jamo costs 0.5 on a short word, while unrelated output costs more than the target's own length.
+
+= Glossary of Hangul and encoding terms
+
+#set text(9pt)
+#table(
+  columns: (auto, 1fr), align: (left, left), stroke: 0.4pt + luma(200), inset: 4pt,
+  table.header([*Term*], [*Meaning*]),
+  [Hangul (한글)], [the Korean alphabet, whose letters group into syllabic blocks],
+  [jamo (자모)], [the individual Hangul letters (consonants and vowels) that compose a block],
+  [초성 / 중성 / 종성], [initial consonant / medial vowel / final consonant(s) of a syllable block],
+  [받침 (batchim)], [the final consonant slot at the bottom of a block; empty, single, or a cluster],
+  [tense consonant], [a doubled consonant (ㄲ, ㄸ, ㅃ, ㅆ, ㅉ), distinct from its plain form],
+  [complex cluster (겹받침)], [a two-consonant final, e.g. ㄺ in 닭, ㄻ in 맑, ㅄ in 값],
+  [precomposed (NFC)], [Unicode form with one code point per syllable (U+AC00–U+D7A3)],
+  [decomposed (NFD)], [Unicode form spelling a syllable as conjoining jamo (U+1100–U+11FF)],
+  [normalization], [NFC/NFD conversion between the two forms; visually identical, different bytes],
+  [tokenizer], [the sub-word segmenter (BPE / SentencePiece) that maps text to model tokens],
+  [CER], [character error rate: edit distance to the target, normalized by target length],
+  [exact-match rate], [fraction of prompts a model renders with CER 0],
+)
